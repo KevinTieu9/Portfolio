@@ -1,0 +1,10 @@
+lockbox
+Author: Kevin Tieu
+CS 375
+
+make
+./lockbox
+
+The file list screen needs the ncurses library:
+sudo apt install libncurses-dev
+./lockbox screen

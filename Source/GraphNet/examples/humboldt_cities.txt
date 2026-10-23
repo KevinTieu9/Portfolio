@@ -1,0 +1,11 @@
+# Sample undirected graph: simplified city network (edge weights represent distance)
+# Format: source target [weight]
+# Lines starting with # are comments
+
+Arcata Eureka 25
+Arcata McKinleyville 8
+Eureka Fortuna 20
+McKinleyville Trinidad 12
+Trinidad Eureka 30
+Fortuna RioDell 10
+RioDell Arcata 45
