@@ -4,7 +4,7 @@
  *
  * Author: Kevin Tieu
  *
- * Reads messages from connected clients and passes them to the server.
+ * Reads incoming messages from clients and hands them to the broadcasters.
  */
 
 using ChatServer.Library.Logging;
@@ -24,12 +24,6 @@ namespace ChatServer.Library
         public ILogger Logger { get; set; }
         public Server Server { get; set; }
 
-        /*
-         * Receiver
-         * Create the receiver. The listen port and server
-         * are set by the caller before Run is called.
-         * return nothing
-         */
         public Receiver()
         {
             
@@ -40,7 +34,6 @@ namespace ChatServer.Library
          * Listen on the receive port. When a client sends a line of text,
          * pass that line to the server so it can be broadcast to the others.
          * Keep doing this until the server is stopped.
-         * return nothing
          */
         public void Run()
         {
@@ -76,13 +69,26 @@ namespace ChatServer.Library
                     BufferedStream stream = new BufferedStream(client.GetStream());
                     reader = new BinaryReader(stream);
                     writer = new BinaryWriter(stream);
+
+                    //grab auth key
                     int authKeyLength = IPAddress.NetworkToHostOrder(reader.ReadInt32());
+                    if (authKeyLength < 1 || authKeyLength > 128)
+                    {
+                        Logger.Log("Rejected auth key length {0}", authKeyLength);
+                        continue;
+                    }
                     byte[] authKeyBytes = reader.ReadBytes(authKeyLength);
                     string authKey = Encoding.UTF8.GetString(authKeyBytes);
 
                     if(Server.ActiveUsers.ContainsKey(authKey) == true)
                     {
+                        //grab message
                         int messageLength = IPAddress.NetworkToHostOrder(reader.ReadInt32());
+                        if (messageLength < 1 || messageLength > 1024)
+                        {
+                            Logger.Log("Rejected message length {0}", messageLength);
+                            continue;
+                        }
                         byte[] messageBytes = reader.ReadBytes(messageLength);
                         string message = Encoding.UTF8.GetString(messageBytes);
                         Server.MessageReceived(Server.ActiveUsers[authKey], message);

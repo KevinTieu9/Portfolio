@@ -8,6 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+
 namespace GUIChat.Properties
 {
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

@@ -4,7 +4,7 @@
  *
  * Author: Kevin Tieu
  *
- * Listens for new clients, checks the username and password, and registers them.
+ * Listens for new clients, checks credentials, and registers users.
  */
 
 using ChatServer.Library.Logging;
@@ -25,12 +25,6 @@ namespace ChatServer.Library
         public ILogger Logger { get; set; }
         public Server Server { get; set; }
 
-        /*
-         * Authenticator
-         * Create the authenticator. The listen port and server
-         * are set by the caller before Run is called.
-         * return nothing
-         */
         public Authenticator()
         {
         }
@@ -40,7 +34,6 @@ namespace ChatServer.Library
          * Listen on the authentication port. For each new client, read the
          * username and password, check them, and add the user to the active list.
          * Keep doing this until the server is stopped.
-         * return nothing
          */
         public void Run()
         {
@@ -75,15 +68,29 @@ namespace ChatServer.Library
                     BufferedStream stream = new BufferedStream(client.GetStream());
                     reader = new BinaryReader(stream);
                     writer = new BinaryWriter(stream);
+
+                    //grab auth string
                     int userNameLength = IPAddress.NetworkToHostOrder(reader.ReadInt32());
+                    if (userNameLength < 1 || userNameLength > 64)
+                    {
+                        Logger.Log("Rejected username length {0}", userNameLength);
+                        continue;
+                    }
                     byte[] userNameBytes = reader.ReadBytes(userNameLength);
                     string userName = Encoding.UTF8.GetString(userNameBytes);
 
                     int passwordLength = IPAddress.NetworkToHostOrder(reader.ReadInt32());
+                    if (passwordLength < 1 || passwordLength > 128)
+                    {
+                        Logger.Log("Rejected password length {0}", passwordLength);
+                        continue;
+                    }
                     byte[] passwordBytes = reader.ReadBytes(passwordLength);
                     string password = Encoding.UTF8.GetString(passwordBytes);
 
                     //TODO validate
+
+                    //assign access key
                     string address = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
                     ChatUser user = new ChatUser() {
                         Address = address,
@@ -91,6 +98,8 @@ namespace ChatServer.Library
                         Name = userName
                     };
                     Server.ActiveUsers[user.AuthString] = user;
+
+                    //return access key to client
                     writer.Write(IPAddress.HostToNetworkOrder(user.AuthString.Length));
                     writer.Write(Encoding.UTF8.GetBytes(user.AuthString));
 
@@ -112,12 +121,6 @@ namespace ChatServer.Library
             }
         }
 
-        /*
-         * GenerateAccessKey
-         * Build a random access key for a newly authenticated user.
-         *
-         * return the key as a string
-         */
         public static string GenerateAccessKey()
         {
             var key = new byte[32];

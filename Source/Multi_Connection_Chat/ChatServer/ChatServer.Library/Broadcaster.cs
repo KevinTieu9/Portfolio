@@ -4,7 +4,7 @@
  *
  * Author: Kevin Tieu
  *
- * Sends messages out to the connected clients.
+ * Sends messages out to connected clients.
  */
 
 using ChatServer.Library.Logging;
@@ -27,25 +27,11 @@ namespace ChatServer.Library
         public bool IsRunning { get; set; }
         public TcpListener Listener { get; set; }
 
-        /*
-         * Broadcaster
-         * Create a broadcaster. The listener and server are set
-         * by the caller before Run is called.
-         * return nothing
-         */
         public Broadcaster()
         {
             PendingMessages = new Queue<KeyValuePair<ChatUser, string>>();
         }
 
-        /*
-         * AddMessage
-         * Queue a message so it will be sent to the connected client.
-         *
-         * user    - the client that sent the message
-         * message - the text to send
-         * return nothing
-         */
         public void AddMessage(ChatUser user, string message)
         {
             PendingMessages.Enqueue(new KeyValuePair<ChatUser, string>(user, message));
@@ -56,7 +42,6 @@ namespace ChatServer.Library
          * Wait for messages that need to go out, then write each one to
          * the clients that should receive it. Keep doing this until the
          * server is stopped.
-         * return nothing
          */
         public void Run()
         {
@@ -89,6 +74,8 @@ namespace ChatServer.Library
                     BufferedStream stream = new BufferedStream(client.GetStream());
                     reader = new BinaryReader(stream);
                     writer = new BinaryWriter(stream);
+
+                    //grab auth key
                     int authKeyLength = IPAddress.NetworkToHostOrder(reader.ReadInt32());
                     byte[] authKeyBytes = reader.ReadBytes(authKeyLength);
                     string authKey = Encoding.UTF8.GetString(authKeyBytes);

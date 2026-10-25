@@ -27,12 +27,6 @@ namespace GUIChat
 
         //private static String mAddress = "";
 [STAThread]
-        /*
-         * Main
-         * Start the Windows Forms client and open the login form.
-         *
-         * return nothing
-         */
         static void Main()
         {
             Application.EnableVisualStyles();

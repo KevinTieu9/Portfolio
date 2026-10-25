@@ -16,13 +16,13 @@ using System.Windows.Forms;
 
 namespace GUIChat
 {
-    public partial class Form1 : Form
+public partial class Form1 : Form
     {
         private const int AuthPort = 3461;
         private const int WritePort = 3462;
         private const int ReadPort = 3463;
 
-        public static string AuthKey = "";
+        private static string authKey = "";
         private static ArrayList messages = new ArrayList();
 
         public static string InputAddress = "";
@@ -33,60 +33,42 @@ namespace GUIChat
          * Form1
          * Build the login form. The address, username, and password boxes
          * are filled in by the designer. This method only starts the form.
-         * return nothing
          */
         public Form1()
         {
             InitializeComponent();
         }
 
-        /*
-         * CloseButton_Click
-         * Close the login form when the user clicks Close.
-         *
-         * sender - the control that raised the event
-         * e      - the event arguments
-         * return nothing
-         */
         private void CloseButton_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        /*
-         * HelloButton_Click
-         * Read the address, username, and password, authenticate with
-         * the server, and open the chat window if it succeeds.
-         *
-         * sender - the control that raised the event
-         * e      - the event arguments
-         * return nothing
-         */
         public void HelloButton_Click(object sender, EventArgs e)
         {
-            // Read the three fields from the form
             InputAddress = AddressText.Text;
             InputName = NameText.Text;
             InputPass = PasswordText.Text;
 
             try
             {
-                // Connect to the authentication port
                 using (TcpClient client = new TcpClient(InputAddress, AuthPort))
                 using (BufferedStream stream = new BufferedStream(client.GetStream()))
                 using (BinaryReader reader = new BinaryReader(stream))
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
-                    // Send the username (length first, then the bytes)
+                    // Send username length + bytes
                     writer.Write(IPAddress.HostToNetworkOrder(InputName.Length));
                     writer.Write(Encoding.UTF8.GetBytes(InputName));
-                    // Send the password the same way
+
+                    // Send password length + bytes
                     writer.Write(IPAddress.HostToNetworkOrder(InputPass.Length));
                     writer.Write(Encoding.UTF8.GetBytes(InputPass));
-                    // Read the access key the server sends back
+
+                    // Receive auth token
                     int authLength = IPAddress.NetworkToHostOrder(reader.ReadInt32());
                     byte[] authBytes = reader.ReadBytes(authLength);
-                    AuthKey = Encoding.UTF8.GetString(authBytes);
+                    authKey = Encoding.UTF8.GetString(authBytes);
                 }
 
                 // Authentication succeeded; open chat form

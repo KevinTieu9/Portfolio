@@ -16,13 +16,6 @@ namespace ChatServer.Terminal
 {
     class Program
     {
-        /*
-         * Main
-         * Start the chat server from the console.
-         *
-         * args - command-line arguments (unused)
-         * return nothing
-         */
         static void Main(string[] args)
         {
             Server server = Server.GetInstance();

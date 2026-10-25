@@ -4,7 +4,7 @@
  *
  * Author: Kevin Tieu
  *
- * Core server. Holds the active users and starts the authenticator,
+ * Core server. Holds active users and coordinates the authenticator,
  * receiver, and broadcasters.
  */
 
@@ -70,13 +70,13 @@ namespace ChatServer.Library
         private Thread _receiverThread = null;
         private List<Thread> _broadcasterThreads = new List<Thread>();
 
+
         /*
          * Server
          * Build the server object and set how many clients it will accept.
          * The authenticator, receiver, and broadcaster list are created here.
          *
          * maxConcurrentUsers - how many clients can be connected at once
-         * return nothing
          */
         private Server(int maxConcurrentUsers = 40)
         {
@@ -103,7 +103,6 @@ namespace ChatServer.Library
          *
          * user    - the client that sent the message
          * message - the text that was received
-         * return nothing
          */
         public void MessageReceived(ChatUser user, string message)
         {
